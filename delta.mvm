@@ -1,0 +1,4 @@
+project = PROJ
+location = //EUKLHDAX/@PROJ/PROJ
+user root = //C:PMCK2/SRC/PROJ
+sub dir = /queens
