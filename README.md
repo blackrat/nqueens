@@ -177,22 +177,23 @@ Population swept from 25 to 6400 across five board sizes, nine runs each.
 
 | n | cheapest | ratio | per solution | cheapest winning 2 in 3 | ratio |
 | --- | --- | --- | --- | --- | --- |
-| 20 | 25 | 1.2x n | 8ms | 400 | 20.0x n |
-| 40 | 25 | 0.6x n | 64ms | 200 | 5.0x n |
-| 80 | 200 | 2.5x n | 925ms | 200 | 2.5x n |
-| 120 | 25 | 0.2x n | 4s | 1600 | 13.3x n |
-| 160 | 400 | 2.5x n | 38s | none reached 2 in 3 | - |
+| 20 | 400 | 20.0x n | 12ms | 400 | 20.0x n |
+| 40 | 25 | 0.6x n | 108ms | 200 | 5.0x n |
+| 80 | 200 | 2.5x n | 2s | 200 | 2.5x n |
+| 120 | 25 | 0.2x n | 7s | 3200 | 26.7x n |
+| 160 | 400 | 2.5x n | 27s | 3200 | 20.0x n |
 
 Above the knee, cost per solution rises with population and buys nothing: at
-n=40, populations of 800/1600/3200/6400 cost 302ms, 315ms, 934ms and 607ms
-against 117ms at population 200. Below it the success rate collapses and the
+n=40, populations of 800/1600/3200/6400 cost 502ms, 513ms, 1.5s and 1.0s
+against 181ms at population 200. Below it the success rate collapses and the
 retries absorb the saving.
 
-Cheapest and reliable pull in different directions. The cheapest population sits
-at 2.5x n or below at every size measured, because a small population that
-restarts costs little per attempt. The cheapest that also wins two runs in three
-is both higher and erratic - 20x n at n=20, 5x n at n=40, 2.5x n at n=80, 13x n
-at n=120, and at n=160 no population managed it at all.
+Cheapest and reliable pull in different directions from n=40 up. There the
+cheapest population sits at 2.5x n or below, because a small population that
+restarts costs little per attempt, while the cheapest that also wins two runs in
+three is higher and erratic - 5x n at n=40, 2.5x n at n=80, 27x n at n=120 and
+20x n at n=160. At n=20 the two agree: every run is over in milliseconds, so
+nothing is saved by restarting and the 400 floor wins outright.
 
 The low-population figures rest on few successes - population 25 at n=120 won
 one run in nine - so that region is noisy. Anything from 1x n to 10x n sits
@@ -200,7 +201,7 @@ inside it.
 
 Because a stalled run is abandoned cheaply, a small population that restarts on
 failure competes with a large one that rarely fails. At n=120, population 25
-costs about 4s per solution against 33s for population 3200.
+costs about 7s per solution against 26s for population 3200.
 
 The default is 10n, floored at 400: the smallest population that wins reliably,
 since the program does not retry for you. `-p` overrides it.
