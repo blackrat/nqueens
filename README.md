@@ -122,7 +122,9 @@ exact runs - re-run the sweeps to regenerate them. Aggregate behaviour was
 re-measured after the change and is unaltered; see `bench/rng-change.txt`. On an Apple M-series
 laptop, timing the route to a first solution:
 
-![time to first solution](bench/crossover.svg)
+*(Charts are being regenerated against the current build - the figures below
+were measured with an earlier random source, as noted above. Run
+`tools/bench.py crossover && tools/bench.py chart` to produce them yourself.)*
 
 Backtracking starts a thousand times faster and stays ahead to about n=29. It
 does not degrade smoothly, though: its cost saw-tooths violently, because
@@ -142,7 +144,8 @@ it drops to 3 successful runs in 7 and averages 14s per win.
 
 ### Population size
 
-![population against time](bench/population.svg)
+*(Chart regenerating - see the note above. `tools/bench.py population` then
+`tools/bench.py chart` reproduces it.)*
 
 Sweeping population from 25 to 6400 across five board sizes, nine runs each:
 
