@@ -71,7 +71,7 @@ static bool parse_long(const char *text, long min, long max, const char *what, l
     const long value = strtol(text, &end, 10);
 
     if (end == text || *end != '\0' || errno == ERANGE || value < min || value > max) {
-        fprintf(err, "queens: %s must be an integer between %ld and %ld, got '%s'\n", what, min,
+        fprintf(err, "nqueens: %s must be an integer between %ld and %ld, got '%s'\n", what, min,
                 max, text);
         return false;
     }
@@ -87,7 +87,7 @@ static bool parse_double(const char *text, double min, double max, const char *w
     const double value = strtod(text, &end);
 
     if (end == text || *end != '\0' || errno == ERANGE || !(value >= min && value <= max)) {
-        fprintf(err, "queens: %s must be a number between %g and %g, got '%s'\n", what, min, max,
+        fprintf(err, "nqueens: %s must be a number between %g and %g, got '%s'\n", what, min, max,
                 text);
         return false;
     }
@@ -122,7 +122,7 @@ static const char *option_value(Parser *parser, const char *long_name)
         return attached + 1;
     }
     if (parser->index + 1 >= parser->argc) {
-        fprintf(parser->err, "queens: %s needs a value\n", arg);
+        fprintf(parser->err, "nqueens: %s needs a value\n", arg);
         return NULL;
     }
     return parser->argv[++parser->index];
@@ -167,7 +167,7 @@ OptionsResult options_parse(Options *options, int argc, char **argv, FILE *err)
             } else if (strcmp(value, "genetic") == 0) {
                 options->algorithm = ALGORITHM_GENETIC;
             } else {
-                fprintf(err, "queens: unknown algorithm '%s' (want backtrack or genetic)\n", value);
+                fprintf(err, "nqueens: unknown algorithm '%s' (want backtrack or genetic)\n", value);
                 return OPTIONS_ERROR;
             }
             continue;
@@ -242,7 +242,7 @@ OptionsResult options_parse(Options *options, int argc, char **argv, FILE *err)
             continue;
         }
 
-        fprintf(err, "queens: unrecognised option '%s'\n", arg);
+        fprintf(err, "nqueens: unrecognised option '%s'\n", arg);
         return OPTIONS_ERROR;
     }
 

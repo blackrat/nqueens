@@ -36,7 +36,7 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
-DEFAULT_BINARY = REPO / "build" / "queens"
+DEFAULT_BINARY = REPO / "build" / "nqueens"
 DEFAULT_OUT = REPO / "bench"
 
 SUMMARY = re.compile(

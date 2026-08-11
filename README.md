@@ -1,4 +1,4 @@
-# queens
+# nqueens
 
 Place *n* non-attacking queens on an *n*x*n* board, by exhaustive backtracking
 or by genetic search, and measure which is faster where.
@@ -15,14 +15,14 @@ Requires CMake 3.20+ and a C17 compiler. Useful switches:
 
 | Option | Default | Effect |
 | --- | --- | --- |
-| `-DQUEENS_BUILD_TESTS=OFF` | `ON` | skip the test suite |
-| `-DQUEENS_WERROR=ON` | `OFF` | warnings become errors |
-| `-DQUEENS_SANITIZE=ON` | `OFF` | address + undefined-behaviour sanitizers |
+| `-DNQUEENS_BUILD_TESTS=OFF` | `ON` | skip the test suite |
+| `-DNQUEENS_WERROR=ON` | `OFF` | warnings become errors |
+| `-DNQUEENS_SANITIZE=ON` | `OFF` | address + undefined-behaviour sanitizers |
 
 ## Use
 
 ```
-usage: queens [options]
+usage: nqueens [options]
 
   -n, --size N            board size (default 8, max 1000)
   -a, --algorithm NAME    backtrack (exhaustive) or genetic (default backtrack)
@@ -60,10 +60,10 @@ Genetic runs print the seed they used, because the default seed comes from the
 clock. Pass it back with `--seed` to replay a run exactly.
 
 ```sh
-queens -n 8                      # all 92 solutions, printed
-queens -n 12 -c                  # count them: 14200
-queens -n 8 -c -H                # square occupancy across all 92
-queens -a genetic -n 20 -m 1     # one 20-queens solution by evolution
+nqueens -n 8                      # all 92 solutions, printed
+nqueens -n 12 -c                  # count them: 14200
+nqueens -n 8 -c -H                # square occupancy across all 92
+nqueens -a genetic -n 20 -m 1     # one 20-queens solution by evolution
 ```
 
 Exit status is 0 when the search ran to its own conclusion, 1 when it was cut

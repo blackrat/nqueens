@@ -62,7 +62,7 @@ double deadline_elapsed(const Deadline *deadline)
 
 static void die_out_of_memory(void)
 {
-    fputs("queens: out of memory\n", stderr);
+    fputs("nqueens: out of memory\n", stderr);
     exit(EXIT_FAILURE);
 }
 
