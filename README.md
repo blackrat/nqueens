@@ -115,8 +115,8 @@ Results, and the machine and binary that produced them, are in `bench/`.
 Backtracking is about a hundred times faster at n=8 and holds the lead to n=27,
 dropping only n=22 and n=24 on the way. Its cost does not grow smoothly. Whether
 the first solution sits early or late in the depth-first order has nothing to do
-with board size, so n=30 takes 4s while n=31 takes 1s, and n=36 exceeds 180s
-while n=37 finishes in 97s.
+with board size, so n=30 takes 4s while n=31 takes 1s, and n=34 takes 178s while
+n=35 takes 18s.
 
 Genetic search leads from n=28, that being the smallest size past which it wins
 at every size measured. Between n=22 and n=27 the two swap places repeatedly, so
@@ -124,20 +124,20 @@ a single crossing point would be misleading.
 
 Backtracking then blew the 180s cap at n=38 and n=39 in succession, which ends
 its sweep. Genetic search still returns a solution in about 200ms at n=40, and
-runs out around n=160: 2 successes in 5, averaging 37s.
+runs out around n=160: 2 successes in 5, averaging 52s.
 
 #### Growth, and why extrapolating it is a trap
 
-Least squares over all 28 measured sizes:
+Least squares over all 29 measured sizes:
 
 ```
-log10(nodes)   = 0.254*n - 0.62     R2 = 0.93
-log10(seconds) = 0.261*n - 7.94     R2 = 0.94
+log10(nodes)   = 0.262*n - 0.75     R2 = 0.93
+log10(seconds) = 0.270*n - 8.11     R2 = 0.93
 ```
 
 About 1.8x more work for each queen added. The R2 flatters it. Residuals span
-0.1x to 18x of the fitted line: n=29 came in at 0.24x, n=30 at 5.5x, n=33 at
-2.3x. More runs will not smooth that out, because backtracking is deterministic
+0.08x to 17x of the fitted line: n=29 came in at 0.21x, n=30 at 4.5x, n=34 at
+15x. More runs will not smooth that out, because backtracking is deterministic
 - each n has exactly one cost. The variation is across sizes, not across trials,
 so it is structure rather than noise.
 
@@ -150,21 +150,21 @@ much the same benefit for free, by being restartable.
 
 Prefer the node fit to the seconds fit if you want to carry it to another
 machine: node count is hardware-independent, while throughput drifted from
-14.2M nodes/s at n=29 to 10.4M at n=37 as the recursion deepened.
+14.1M nodes/s at n=29 to 10.5M at n=37 as the recursion deepened.
 
 How badly this fails at distance is worth being concrete about. For n=100 the
-two fits above - least squares over the *same* 28 points - disagree with each
-other by 2.25x:
+two fits above - least squares over the *same* 29 points - disagree with each
+other by 2.4x:
 
 | | prediction for n=100 |
 | --- | --- |
-| node fit | 6.4e24 nodes, about 22 billion years at measured throughput |
-| seconds fit | 1.6e18 seconds, about 50 billion years |
+| node fit | 2.9e25 nodes, about 100 billion years at measured throughput |
+| seconds fit | 7.6e18 seconds, about 240 billion years |
 
 Both are past the age of the universe, so the disagreement hardly matters, but
 it shows the arithmetic is not carrying real information that far out. Measured,
 n=100 ran for 600s and explored 5,466,619,904 nodes without finding a solution -
-roughly 1e-15 of the node fit's estimate, at 9.1M nodes/s, continuing the
+roughly 2e-16 of the node fit's estimate, at 9.1M nodes/s, continuing the
 throughput decline. All the run establishes is "not soon".
 
 ### Population size
@@ -229,9 +229,9 @@ evaluation is O(n^2): at n=100 that is 10,000 operations per individual and
 about 10^7 per generation. Complexity notation discards exactly the factor that
 decides the race here.
 
-**The machine intrudes.** Node throughput fell from 14.2M/s at n=29 to 10.4M/s
+**The machine intrudes.** Node throughput fell from 14.1M/s at n=29 to 10.5M/s
 at n=37 purely from deeper recursion and worse cache behaviour. Nothing in the
-asymptotics predicts a 27% slowdown in the constant.
+asymptotics predicts a 25% slowdown in the constant.
 
 **The mean may not exist.** With heavy-tailed runtimes, average-case complexity
 is not a well-defined thing to quote, let alone to compare.

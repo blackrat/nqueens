@@ -1,6 +1,6 @@
 platform: macOS-26.5.2-arm64-arm-64bit-Mach-O
 machine: arm64
 python: 3.14.6
-binary: queens sha256=606507bfec33db76b934636d6fb2ab0aab080453bb4285ac611e0a18cab40f12
+binary: nqueens sha256=2f2e4fb7868cf463b2263d3be620a330187748d8e5ced8ec6e2670c1d3087334
 cpu: Apple M4
 cores: 10
