@@ -43,5 +43,5 @@ compile_commands.json
 # Python bytecode from tools/
 __pycache__/
 
-# Unredacted provenance lives only in the private repo
-PROVENANCE.unredacted.md
+# Unredacted history lives only in the private repo
+HISTORY.unredacted.md

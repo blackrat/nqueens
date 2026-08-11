@@ -1,11 +1,7 @@
 # queens
 
-Place *n* non-attacking queens on an *n*×*n* board, by exhaustive backtracking
-or by genetic search.
-
-Originally a Borland C / DJGPP / Watcom program from around 1992. See
-[History](#history) for what changed and why, and [PROVENANCE.md](PROVENANCE.md)
-for the evidence behind that date.
+Place *n* non-attacking queens on an *n*x*n* board, by exhaustive backtracking
+or by genetic search, and measure which is faster where.
 
 ## Build
 
@@ -93,63 +89,46 @@ solution for boards up to about n=40 in well under a second.
 
 ## Benchmarks
 
-`tools/bench.py` times each solver's route to a *first* solution and charts the
-result. It needs nothing but python3 — the charts are SVG written directly.
+`tools/bench.py` times how long each solver takes to reach its *first* solution.
+It needs only python3; the charts are SVG, written directly.
 
 ```sh
-tools/bench.py crossover     # time to first solution vs board size, both solvers
-tools/bench.py population    # time to first solution vs population, genetic only
+tools/bench.py crossover     # time to first solution vs board size
+tools/bench.py population    # time to first solution vs population
 tools/bench.py chart         # render bench/*.svg and bench/report.html
 ```
 
-Every run is capped by `--limit` (3 minutes by default, which is what decides
-how far the sweep goes) and each sweep has an overall `--budget`. Rows are
-flushed to CSV as they are measured, so an interrupted sweep still leaves usable
-data and `--resume` picks up where it stopped.
+Each run is capped by `--limit`, 180s by default, and each sweep by `--budget`.
+Rows are flushed to CSV as they are measured, so an interrupted sweep still
+leaves usable data and `--resume` continues it.
 
 Backtracking is deterministic, so each size is the median of repeated runs. The
-genetic search is neither deterministic nor reliable — it dead-ends — so each
-size is several runs with fixed, reproducible seeds, and the charts carry two
-genetic lines: the mean over the runs that succeeded (what you feel when it
-works) and the total time spent per solution actually obtained (what it costs
-you including the failures). The second is the one to compare against
-backtracking.
+genetic search is not, and it dead-ends, so each size is several runs from fixed
+seeds. It is reported two ways: the mean over runs that succeeded, and the total
+time spent per solution actually obtained. The second includes the failures.
 
-Results, and the machine they came from, are in `bench/`. They were measured
-before the random source was replaced on 2026-08-11 (see
-[PROVENANCE.md](PROVENANCE.md)), so a given `--seed` no longer replays those
-exact runs - re-run the sweeps to regenerate them. Aggregate behaviour was
-re-measured after the change and is unaltered; see `bench/rng-change.txt`. On an Apple M-series
-laptop, timing the route to a first solution:
+Results, and the machine and binary that produced them, are in `bench/`.
 
-*(Charts are being regenerated against the current build - the figures below
-were measured with an earlier random source, as noted above. Run
-`tools/bench.py crossover && tools/bench.py chart` to produce them yourself.)*
+### Board size
 
-Backtracking starts a thousand times faster and stays ahead to about n=29. It
-does not degrade smoothly, though: its cost saw-tooths violently, because
-whether the first solution sits early or late in the depth-first order has
-nothing to do with the size of the board. n=30 costs 5s while n=31 costs 1s;
-n=36 blew the 3-minute cap while n=37 finished in 93s.
+Backtracking is about a thousand times faster at n=8 and keeps the lead to n=29.
+Its cost does not grow smoothly. Whether the first solution sits early or late
+in the depth-first order has nothing to do with board size, so n=30 takes 5s
+while n=31 takes 1s, and n=36 exceeds 180s while n=37 finishes in 93s.
 
-Genetic search overtakes it for good at **n=30**, meaning that is the smallest
-size past which it wins at every size measured. Calling any single size "the"
-crossover would be tidier than the data deserves - the two lines swap places
-several times between n=20 and n=29.
+Genetic search leads from n=30, that being the smallest size past which it wins
+at every size measured. Between n=20 and n=29 the two swap places repeatedly, so
+a single crossing point would be misleading.
 
-Past n=37 the comparison ends: backtracking cannot find a first solution inside
-3 minutes at most sizes, while the genetic search is still returning one in
-about 200ms. It has its own ceiling, just much further out - around n=160, where
-it drops to 3 successful runs in 7 and averages 14s per win.
+Past n=37 backtracking exceeds 180s at most sizes. Genetic search still returns
+a solution in about 200ms, and runs out around n=160: 3 successes in 7,
+averaging 14s.
 
 ### Population size
 
-*(Chart regenerating - see the note above. `tools/bench.py population` then
-`tools/bench.py chart` reproduces it.)*
+Population swept from 25 to 6400 across five board sizes, nine runs each.
 
-Sweeping population from 25 to 6400 across five board sizes, nine runs each:
-
-| n | cheapest | ratio | per solution | cheapest that wins 2 in 3 | ratio |
+| n | cheapest | ratio | per solution | cheapest winning 2 in 3 | ratio |
 | --- | --- | --- | --- | --- | --- |
 | 20 | 25 | 1.2x n | 4ms | 25 | 1.2x n |
 | 40 | 50 | 1.2x n | 46ms | 50 | 1.2x n |
@@ -157,133 +136,19 @@ Sweeping population from 25 to 6400 across five board sizes, nine runs each:
 | 120 | 25 | 0.2x n | 4s | 1600 | 13.3x n |
 | 160 | 800 | 5.0x n | 19s | 800 | 5.0x n |
 
-The curve is an L, not a U. **Above the knee, cost grows linearly with
-population and buys nothing** - at n=40, populations of 800/1600/3200/6400 cost
-208ms/370ms/401ms/654ms per solution. Cost per generation is proportional to
-population, and the generations needed barely fall. **Below the knee the
-success rate collapses**, and the retries eat the saving.
+Above the knee, cost per solution rises linearly with population and buys
+nothing: at n=40, populations of 800/1600/3200/6400 cost 208ms, 370ms, 401ms and
+654ms. Below it the success rate collapses and the retries absorb the saving.
+The knee moves right as n grows, from about 1x n up to n=40 to about 5x n from
+n=80 on.
 
-So the population you want is the smallest one that still wins, and that knee
-moves right as n grows: about 1x n up to n=40, about 5x n from n=80 on.
+The low-population figures rest on few successes - population 25 at n=120 won
+one run in nine - so that region is noisy. Anything from 1x n to 10x n sits
+inside it.
 
-The default does **not** follow that line, though, because this program does not
-restart a failed search for you. The cost-per-solution column above assumes a
-retry loop; without one, a default that stalls one run in three is a worse
-experience than one that is slightly slower and actually finds the thing. The
-win rate settles around 10x n, so that is the default, with a floor of 400 for
-small boards. `-p` overrides it when you want the cheap-and-retry behaviour.
+Because a stalled run is abandoned cheaply, a small population that restarts on
+failure competes with a large one that rarely fails. At n=120, population 25
+costs about 4s per solution against 13s for population 3200.
 
-Measured against the old fixed 1000, twelve runs per size, that rule is a clear
-win on small boards and a wash on large ones:
-
-| n | fixed 1000 | 10n (floor 400) |
-| --- | --- | --- |
-| 20 | 11/12, 38ms | 10/12, 27ms |
-| 40 | 11/12, 332ms | 11/12, 147ms |
-| 80 | 12/12, 1.3s | 9/12, 2.6s |
-| 120 | 7/12, 20s | 9/12, 15s |
-| 160 | 9/12, 31s | 7/12, 45s |
-
-Do not read more into the n=80 and n=160 rows than is there. A population of 800
-measured 9 wins in 9 in the sweep above and 9 in 12 here - same population,
-different seeds. That spread *is* the noise floor, and the gaps at n=80 and
-n=160 sit inside it. The defensible claims are the small-board speed-up, where
-the effect is large and consistent, and that a population expressed as a
-multiple of n stays sane at board sizes nobody benchmarked: a fixed 1000 is 125x
-n at n=8 and only 2x n at n=500, which is well under the knee.
-
-Two caveats on those numbers. The n=120 "cheapest" row is an artefact worth
-seeing: population 25 won one run in nine, so its cost per solution rests on a
-single sample. That is why the table carries a second criterion. And the whole
-low-population region is noisy for the same reason - the honest reading is that
-anything from 1x n to 10x n is within the noise, not that 1.2x n is precisely
-optimal.
-
-The one genuinely interesting result: because stall detection cuts a failed run
-off cheaply, **a small population that restarts on failure is competitive with a
-large one that rarely fails**. At n=120, population 25 restarting costs about 4s
-per solution against 13s for a population of 3200 that wins every time.
-
-## Layout
-
-```
-src/runtime.*    clock, time budget, interrupt flag, allocation
-src/board.*      placement primitives, rendering, occupancy heatmap
-src/recorder.*   where solvers hand in solutions: dedupe, count, limit, print
-src/backtrack.*  exhaustive depth-first search
-src/genetic.*    evolutionary search
-src/keys.*       non-blocking key polling (termios, _kbhit, or nothing)
-src/options.*    command-line parsing
-src/main.c       wiring and reporting
-```
-
-## History
-
-The original was five `.c` files — `8qrecurs.c`, `8qalife.c`, `work.c`,
-`gnuwork.c`, `test1.c`. Four of them are near-identical and carry *both*
-solvers, recursive and genetic, in one source behind `#ifdef GENETIC`, differing
-only in `#define`d constants and which branch was left live; `test1.c` is an
-earlier genetic-only program with no recursive path at all. Board size,
-population, time budget and the choice of algorithm were all compile-time, so
-trying a different board size meant editing a source file, and trying a
-different *combination* meant keeping another copy of the whole program. They
-are one program with runtime options now; that is the bulk of the change.
-
-The single-purpose filenames (`8qrecurs.c` versus `8qalife.c`) came later than
-the dual-algorithm sources, splitting the program so that building one or the
-other no longer meant toggling a flag. That ordering matters for dating, and is
-set out in [PROVENANCE.md](PROVENANCE.md).
-
-Also gone: `<alloc.h>` and `coreleft()`, a vendored 1990 BSD `qsort.c` (the C
-library's is fine), and the Turbo C project and debugger files (`8q.prj`,
-`8q.tfa`, `tdconfig.td`, `tfconfig.tf`, `delta.mvm`).
-
-The `<conio.h>` interaction survives in `src/keys.*`, rebuilt on termios rather
-than DOS. What did not survive is the original's `while (!kbhit()) {}`
-busy-waits, which blocked after every solution until you pressed something.
-
-Bugs fixed along the way:
-
-- `srand(NULL)` — `SEED` was `#define`d to `NULL` unless `RANDSEED` was set, so
-  the pointer constant was passed where a seed was wanted.
-- Solutions were stored in a fixed `boards[92]` array sized for the 8-queens
-  answer, while `HSIZE` was 18 or 24 in most variants. Finding a 93rd solution
-  wrote past the end.
-- `unique_board()` copied `NUMBEROFQUEENS + 1` bytes out of a
-  `NUMBEROFQUEENS`-byte allocation, and ignored `malloc` failure before writing
-  through the result.
-- The breeding loop stepped `i += 2` and wrote to `gene[i + 1]` without checking
-  the bound, so an odd population ran off the end of the array.
-- `main()` was implicitly `int` with no return type, and prototypes disagreed
-  with definitions (`main(void)` declared, `main()` defined).
-
-Three deliberate behaviour changes, the first two to make the genetic search
-actually finish:
-
-- The mutation rate defaults to 0.9 per child rather than the original's
-  ~0.0001. At the original rate the population converged almost immediately and
-  then sat there.
-- The original declared the run dead the moment the surviving half of the
-  population shared one genome, and called `exit(-1)`. That is premature once
-  mutation is doing real work, so the give-up test is now "no improvement in the
-  best fitness for `--stall` generations" (default 2000), and it reports rather
-  than aborts.
-
-- The seed is taken from the clock unless `--seed` says otherwise, so runs differ
-  by default and you have to opt in to repeating one. The original had this
-  backwards: it seeded from a fixed `NULL` unless `RANDSEED` was `#define`d at
-  compile time, so every run of a given build was identical.
-
-`--mutation-rate 0.0001 --seed 0` gets you the historical tuning back,
-stagnation and all.
-
-## Copyright and licence
-
-Copyright (c) 1992-2026 Paul McKibbin. Released under the MIT licence - see
-[LICENSE](LICENSE). Use it, learn from it, build on it; the one thing the
-licence asks is that the copyright notice travels with it, so the work stays
-attributed.
-
-The 1992 start date is evidenced rather than assumed - see
-[PROVENANCE.md](PROVENANCE.md). No third-party code remains in the tree, so
-the licence covers all of it cleanly.
+The default is 10n, floored at 400: the smallest population that wins reliably,
+since the program does not retry for you. `-p` overrides it.

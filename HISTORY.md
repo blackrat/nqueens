@@ -1,6 +1,28 @@
-# Provenance of the original queens sources
+# History
 
 Copyright (c) 1992-2026 Paul McKibbin
+
+How this program got here: what the original looked like, and what is known
+about when it was written.
+
+## The original
+
+The original was five `.c` files — `8qrecurs.c`, `8qalife.c`, `work.c`,
+`gnuwork.c`, `test1.c`. Four of them are near-identical and carry *both*
+solvers, recursive and genetic, in one source behind `#ifdef GENETIC`, differing
+only in `#define`d constants and which branch was left live; `test1.c` is an
+earlier genetic-only program with no recursive path at all. Board size,
+population, time budget and the choice of algorithm were all compile-time, so
+trying a different board size meant editing a source file, and trying a
+different *combination* meant keeping another copy of the whole program. They
+are one program with runtime options now; that is the bulk of the change.
+
+The single-purpose filenames (`8qrecurs.c` versus `8qalife.c`) came later than
+the dual-algorithm sources, splitting the program so that building one or the
+other no longer meant toggling a flag. That ordering matters for dating, and is
+set out under "Dating the original" below.
+
+## Dating the original
 
 This file records what can and cannot be established about *when* the original
 program was written, and on what evidence. It exists because the date matters
@@ -12,7 +34,7 @@ archived copies held on the household archive host. Paths below are given
 relative to its archive root, as `archive/paul/...`. An unredacted copy of this
 file, naming the host and its addresses, is kept in the private repository.
 
-## What is NOT evidence
+### What is NOT evidence
 
 Read this first, because it rules out the things one instinctively reaches for.
 
@@ -32,7 +54,7 @@ Read this first, because it rules out the things one instinctively reaches for.
 - **A copyright notice.** Including the one now at the top of these files. It is
   an assertion, not a record. It carries no weight on its own.
 
-## What IS evidence
+### What IS evidence
 
 Each of these is a tool artefact embedded in a file. None could have been
 produced before the tool that made it existed, which makes them hard lower
@@ -74,7 +96,7 @@ the first: `8qalife.dsw`, `.opt`, `.ncb` and `.plg` are Visual C++ 6 files
 (1998+), and `8qrecurs.plg` records builds from `Y:\Work in Progress\Src\
 queens\`. A third touch, on Linux, is dated `2012-03-11`.
 
-## Chain of custody
+### Chain of custody
 
 The evidence above lives in the archived directory; the code being rewritten
 lives in this git repository. The two are the same bytes. Every original file
@@ -118,7 +140,7 @@ git, are worth recording for the same reason:
 | `command.com` (MS-DOS 5.0) | `74ad25067e7d9f5c3a0ac2f2967347defb0ffef9e6ed60b60e6499f0b1a8cc89` |
 | `tc0000.swp` | `4cdce519297f7c8792d89c9ff05e5604b06bbd75fb7fae383c8705cbe79bba6c` |
 
-### Both algorithms are in the oldest set
+#### Both algorithms are in the oldest set
 
 It would be easy to read the filenames in the oldest directory - `8qrecurs.c`,
 `work.c`, `gnuwork.c` - and conclude that only the recursive solver is evidenced
@@ -162,7 +184,7 @@ cannot be read as a recursive program that happens to carry unused code.
 recursive one.** `8qalife.c` in the later trees is a split-out of code already
 present here, not the first appearance of the technique.
 
-## On Subversion
+### On Subversion
 
 The original working assumption was that the history lived in a Subversion
 archive. It cannot: **Subversion did not exist until 2000** (1.0 shipped in
@@ -177,7 +199,7 @@ is a *revision property* and revision properties are mutable
 (`svn propset --revprop`), so an SVN date is weaker evidence than the tool
 artefacts here, not stronger.
 
-## Strengthening the record
+### Strengthening the record
 
 The evidence above is circumstantial but independent and hard to fake after the
 fact. If priority genuinely needs to be defended, the things that would harden
@@ -191,7 +213,7 @@ it are:
   proof). This proves the files existed no *later* than now, which does not help
   with 1992 priority, but it stops the record drifting further and is cheap.
 
-## Third-party code
+### Third-party code
 
 For completeness, since it bears on what is and is not original work here:
 
