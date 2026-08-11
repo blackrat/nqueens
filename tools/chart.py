@@ -77,6 +77,10 @@ def summarise(runs: list[dict]) -> dict:
         "rate": len(wins) / len(runs) if runs else 0.0,
         "mean": statistics.mean(wins) if wins else None,
         "median": statistics.median(wins) if wins else None,
+        # The spread across runs, which is the point of a stochastic search:
+        # the mean alone hides how wide the outcome actually is.
+        "low": min(wins) if wins else None,
+        "high": max(wins) if wins else None,
         # Restart-on-failure expectation: everything spent, per solution won.
         "expected": spent / len(wins) if wins else None,
     }
@@ -177,6 +181,23 @@ def esc(text) -> str:
     return html.escape(str(text), quote=True)
 
 
+# SVG has no text wrapping, so a subtitle longer than the surface is simply cut
+# off at the edge. 6.35px per character is close enough for the 12.5px UI font.
+SUB_CHAR = 6.35
+
+
+def wrap(text: str, pixels: float) -> list[str]:
+    lines, current = [], ""
+    for word in text.split():
+        candidate = f"{current} {word}".strip()
+        if current and len(candidate) * SUB_CHAR > pixels:
+            lines.append(current)
+            current = word
+        else:
+            current = candidate
+    return lines + [current] if current else lines
+
+
 def render_chart(*, title, subtitle, series, x_label, y_label, x_ticks, x_scale_kind,
                  width=980, height=520, annotation=None, chart_id="chart",
                  dark_mode=False) -> str:
@@ -194,11 +215,21 @@ def render_chart(*, title, subtitle, series, x_label, y_label, x_ticks, x_scale_
     unconditionally, which is worse than having no dark mode at all.
     """
     left, right, top, bottom = 74, 232, 104, 62
+    # A wrapped subtitle pushes everything below it down and grows the surface,
+    # so the plot keeps its height instead of being squashed.
+    sub_lines = wrap(subtitle, width - left - 24)
+    extra = 17 * (len(sub_lines) - 1)
+    height += extra
     plot_left, plot_right = left, width - right
-    plot_top, plot_bottom = top, height - bottom
+    plot_top, plot_bottom = top + extra, height - bottom
 
     xs = [x for s in series for x, _, _ in s["points"]]
     ys = [y for s in series for _, y, _ in s["points"]]
+    # A band widens the y range: its extremes have to fit inside the plot too.
+    for entry in series:
+        for x, low, high in entry.get("band", ()):
+            xs.append(x)
+            ys.extend((low, high))
     if not xs or not ys:
         return f"<!-- no data for {esc(title)} -->"
 
@@ -249,17 +280,18 @@ def render_chart(*, title, subtitle, series, x_label, y_label, x_ticks, x_scale_
         f'fill="{light["surface"]}"/>')
     add(f'<text class="title ink1" x="{left}" y="30" fill="{light["primary"]}">'
         f'{esc(title)}</text>')
-    add(f'<text class="sub ink2" x="{left}" y="52" fill="{light["secondary"]}">'
-        f'{esc(subtitle)}</text>')
+    for index, line in enumerate(sub_lines):
+        add(f'<text class="sub ink2" x="{left}" y="{52 + 17 * index}" '
+            f'fill="{light["secondary"]}">{esc(line)}</text>')
 
     # A legend is always present for two or more series; the end-of-line labels
     # are the second, redundant channel so identity is never colour alone.
     cursor = left
     for entry in series:
         slot, name = entry["slot"], entry["name"]
-        add(f'<rect class="fill{slot}" x="{cursor:.0f}" y="70" width="11" height="11" '
-            f'rx="2.5" fill="{SERIES[slot - 1][0]}"/>')
-        add(f'<text class="legend ink2" x="{cursor + 17:.0f}" y="80" '
+        add(f'<rect class="fill{slot}" x="{cursor:.0f}" y="{70 + extra}" width="11" '
+            f'height="11" rx="2.5" fill="{SERIES[slot - 1][0]}"/>')
+        add(f'<text class="legend ink2" x="{cursor + 17:.0f}" y="{80 + extra}" '
             f'fill="{light["secondary"]}">{esc(name)}</text>')
         cursor += 32 + 7.2 * len(name)
 
@@ -295,6 +327,20 @@ def render_chart(*, title, subtitle, series, x_label, y_label, x_ticks, x_scale_
             f'y="{plot_top - 9:.1f}" text-anchor="{"end" if flip else "start"}" '
             f'fill="{light["muted"]}">{esc(text)}</text>')
 
+    # Bands first, so the mean lines and markers sit on top of them.
+    for entry in series:
+        band = entry.get("band")
+        if not band:
+            continue
+        colour = SERIES[entry["slot"] - 1][0]
+        upper = " ".join(f'{"M" if i == 0 else "L"}{x_scale(x):.1f},{y_scale(high):.1f}'
+                         for i, (x, _, high) in enumerate(band))
+        lower = " ".join(f'L{x_scale(x):.1f},{y_scale(low):.1f}'
+                         for x, low, _ in reversed(band))
+        add(f'<path class="fill{entry["slot"]}" d="{upper} {lower} Z" fill="{colour}" '
+            f'fill-opacity="0.16" stroke="none"/>')
+
+    end_labels = []
     for entry in series:
         slot = entry["slot"]
         colour = SERIES[slot - 1][0]
@@ -310,8 +356,19 @@ def render_chart(*, title, subtitle, series, x_label, y_label, x_ticks, x_scale_
                 f'stroke="{light["surface"]}" stroke-width="2">'
                 f'<title>{esc(tip)}</title></circle>')
         last_x, last_y, _ = points[-1]
-        add(f'<text class="end-label fill{slot}" x="{x_scale(last_x) + 12:.1f}" '
-            f'y="{y_scale(last_y) + 4:.1f}" fill="{colour}">{esc(entry["name"])}</text>')
+        end_labels.append([x_scale(last_x) + 12, y_scale(last_y) + 4, slot,
+                           colour, entry["name"]])
+
+    # The direct label is the second identity channel, so two series ending at
+    # the same value must not overprint: nudge the lower one down until it clears.
+    end_labels.sort(key=lambda label: label[1])
+    for index in range(1, len(end_labels)):
+        gap = end_labels[index][1] - end_labels[index - 1][1]
+        if gap < 15:
+            end_labels[index][1] = end_labels[index - 1][1] + 15
+    for x, y, slot, colour, name in end_labels:
+        add(f'<text class="end-label fill{slot}" x="{x:.1f}" y="{y:.1f}" '
+            f'fill="{colour}">{esc(name)}</text>')
 
     add("</svg>")
     return "\n".join(out)
@@ -325,13 +382,12 @@ def crossover_chart(data: dict, dark_mode: bool = False) -> tuple[str, int | Non
     backtrack = [(n, t, f"backtracking, n={n}: {seconds_label(t)}")
                  for n, t in sorted(data["backtrack"].items())]
     mean = [(n, s["mean"],
-             f"genetic, n={n}: mean {seconds_label(s['mean'])} over "
-             f"{s['wins']} of {s['attempts']} runs that succeeded")
+             f"genetic, n={n}: mean {seconds_label(s['mean'])}, "
+             f"fastest {seconds_label(s['low'])}, slowest {seconds_label(s['high'])} "
+             f"({s['wins']} of {s['attempts']} runs succeeded)")
             for n, s in sorted(data["genetic"].items()) if s["mean"] is not None]
-    expected = [(n, s["expected"],
-                 f"genetic, n={n}: {seconds_label(s['expected'])} per solution "
-                 f"including retries ({s['rate'] * 100:.0f}% of runs succeed)")
-                for n, s in sorted(data["genetic"].items()) if s["expected"] is not None]
+    spread = [(n, s["low"], s["high"])
+              for n, s in sorted(data["genetic"].items()) if s["mean"] is not None]
 
     crossing = find_crossover(data)
     every = sorted({n for n, _, _ in backtrack} | {n for n, _, _ in mean})
@@ -343,11 +399,11 @@ def crossover_chart(data: dict, dark_mode: bool = False) -> tuple[str, int | Non
     svg = render_chart(
         title="Time to a first solution: backtracking vs genetic search",
         subtitle="Both axes log; each horizontal gridline is 10x the one below. "
-                 "Backtracking is absent at sizes where it blew the 3-minute cap.",
+                 "The shaded band is the fastest to the slowest run at each size. "
+                 "Backtracking is absent where it blew the 3-minute cap.",
         series=[
             {"name": "backtracking", "slot": 1, "points": backtrack},
-            {"name": "genetic mean", "slot": 2, "points": mean},
-            {"name": "genetic + retries", "slot": 3, "points": expected},
+            {"name": "genetic mean", "slot": 2, "points": mean, "band": spread},
         ],
         x_label="board size n", y_label="time to first solution",
         x_ticks=ticks, x_scale_kind="log",
@@ -503,8 +559,9 @@ def render_all(args) -> int:
     lede = ("Time to a <em>first</em> solution, measured by the solver's own clock. "
             "Backtracking is deterministic, so each size is the median of repeated "
             "runs. The genetic search is not, and dead-ends often, so each size is "
-            "several runs: both the mean of the wins and the honest cost per "
-            "solution including the failures are plotted.")
+            "several runs: the line is the mean of the wins and the band around it "
+            "is the fastest to the slowest of them. The cost per solution including "
+            "the failed runs is in the table below.")
     if crossing:
         lede += f" Genetic search pulls ahead for good at n={crossing}."
     lede += ratio_note

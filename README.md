@@ -104,25 +104,27 @@ leaves usable data and `--resume` continues it.
 
 Backtracking is deterministic, so each size is the median of repeated runs. The
 genetic search is not, and it dead-ends, so each size is several runs from fixed
-seeds. It is reported two ways: the mean over runs that succeeded, and the total
-time spent per solution actually obtained. The second includes the failures.
+seeds. The chart plots the mean over the runs that succeeded, banded with the
+fastest and the slowest of them; the table beside it adds the total time spent
+per solution actually obtained, which counts the failures too.
 
 Results, and the machine and binary that produced them, are in `bench/`.
 
 ### Board size
 
-Backtracking is about a thousand times faster at n=8 and keeps the lead to n=29.
-Its cost does not grow smoothly. Whether the first solution sits early or late
-in the depth-first order has nothing to do with board size, so n=30 takes 5s
-while n=31 takes 1s, and n=36 exceeds 180s while n=37 finishes in 93s.
+Backtracking is about a hundred times faster at n=8 and holds the lead to n=27,
+dropping only n=22 and n=24 on the way. Its cost does not grow smoothly. Whether
+the first solution sits early or late in the depth-first order has nothing to do
+with board size, so n=30 takes 4s while n=31 takes 1s, and n=36 exceeds 180s
+while n=37 finishes in 97s.
 
-Genetic search leads from n=30, that being the smallest size past which it wins
-at every size measured. Between n=20 and n=29 the two swap places repeatedly, so
+Genetic search leads from n=28, that being the smallest size past which it wins
+at every size measured. Between n=22 and n=27 the two swap places repeatedly, so
 a single crossing point would be misleading.
 
-Past n=37 backtracking exceeds 180s at most sizes. Genetic search still returns
-a solution in about 200ms, and runs out around n=160: 3 successes in 7,
-averaging 14s.
+Backtracking then blew the 180s cap at n=38 and n=39 in succession, which ends
+its sweep. Genetic search still returns a solution in about 200ms at n=40, and
+runs out around n=160: 2 successes in 5, averaging 37s.
 
 #### Growth, and why extrapolating it is a trap
 
@@ -171,17 +173,22 @@ Population swept from 25 to 6400 across five board sizes, nine runs each.
 
 | n | cheapest | ratio | per solution | cheapest winning 2 in 3 | ratio |
 | --- | --- | --- | --- | --- | --- |
-| 20 | 25 | 1.2x n | 4ms | 25 | 1.2x n |
-| 40 | 50 | 1.2x n | 46ms | 50 | 1.2x n |
-| 80 | 400 | 5.0x n | 724ms | 400 | 5.0x n |
+| 20 | 25 | 1.2x n | 8ms | 400 | 20.0x n |
+| 40 | 25 | 0.6x n | 64ms | 200 | 5.0x n |
+| 80 | 200 | 2.5x n | 925ms | 200 | 2.5x n |
 | 120 | 25 | 0.2x n | 4s | 1600 | 13.3x n |
-| 160 | 800 | 5.0x n | 19s | 800 | 5.0x n |
+| 160 | 400 | 2.5x n | 38s | none reached 2 in 3 | - |
 
-Above the knee, cost per solution rises linearly with population and buys
-nothing: at n=40, populations of 800/1600/3200/6400 cost 208ms, 370ms, 401ms and
-654ms. Below it the success rate collapses and the retries absorb the saving.
-The knee moves right as n grows, from about 1x n up to n=40 to about 5x n from
-n=80 on.
+Above the knee, cost per solution rises with population and buys nothing: at
+n=40, populations of 800/1600/3200/6400 cost 302ms, 315ms, 934ms and 607ms
+against 117ms at population 200. Below it the success rate collapses and the
+retries absorb the saving.
+
+Cheapest and reliable pull in different directions. The cheapest population sits
+at 2.5x n or below at every size measured, because a small population that
+restarts costs little per attempt. The cheapest that also wins two runs in three
+is both higher and erratic - 20x n at n=20, 5x n at n=40, 2.5x n at n=80, 13x n
+at n=120, and at n=160 no population managed it at all.
 
 The low-population figures rest on few successes - population 25 at n=120 won
 one run in nine - so that region is noisy. Anything from 1x n to 10x n sits
@@ -189,7 +196,7 @@ inside it.
 
 Because a stalled run is abandoned cheaply, a small population that restarts on
 failure competes with a large one that rarely fails. At n=120, population 25
-costs about 4s per solution against 13s for population 3200.
+costs about 4s per solution against 33s for population 3200.
 
 The default is 10n, floored at 400: the smallest population that wins reliably,
 since the program does not retry for you. `-p` overrides it.
@@ -204,7 +211,7 @@ Per step, the two are not close:
 | genetic | O(n^2) per fitness evaluation, so O(P n^2) per generation with population P; O(n^3) at the default P=10n | generations | none - it can stall and never converge |
 
 Those two bounds are not comparable in any useful way, and the measured
-crossover at n=30 is not predicted by either of them. Several reasons, and they
+crossover at n=28 is not predicted by either of them. Several reasons, and they
 generalise past this program:
 
 **Worst case is not observed case.** Backtracking's O(n!) is the unpruned

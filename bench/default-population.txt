@@ -1,0 +1,10 @@
+Default population rule: fixed 1000 vs max(400, 10n).
+12 runs per size, -m 1, 45s cap. 'per solution' counts failed runs.
+
+   n              old: fixed 1000            new: max(400,10n)
+   8 12/12     0.001s per solution 12/12     0.000s per solution
+  20 11/12     0.038s per solution 10/12     0.027s per solution
+  40 11/12     0.332s per solution 11/12     0.147s per solution
+  80 12/12     1.298s per solution  9/12     2.629s per solution
+ 120  7/12    19.917s per solution  9/12    14.841s per solution
+ 160  9/12    31.357s per solution  7/12    45.252s per solution

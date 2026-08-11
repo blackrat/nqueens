@@ -1,0 +1,240 @@
+<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>queens benchmarks</title><style>
+:root { color-scheme: light dark; }
+body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+       background: #f9f9f7; color: #0b0b0b; margin: 0; padding: 40px 24px 80px; }
+main { max-width: 1010px; margin: 0 auto; }
+h1 { font-size: 24px; margin: 0 0 6px; }
+p.lede { color: #52514e; margin: 0 0 32px; max-width: 68ch; line-height: 1.55; }
+figure { margin: 0 0 10px; background: #fcfcfb; border: 1px solid rgba(11,11,11,.10);
+         border-radius: 10px; padding: 8px; }
+figure svg { display: block; width: 100%; height: auto; }
+details { margin: 0 0 40px; }
+summary { cursor: pointer; color: #52514e; font-size: 13px; padding: 6px 2px; }
+table { border-collapse: collapse; font-size: 13px; margin-top: 8px;
+        font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 5px 12px; border-bottom: 1px solid #e1e0d9; }
+th:first-child, td:first-child { text-align: left; }
+.finding { background: #fcfcfb; border: 1px solid rgba(11,11,11,.10);
+           border-radius: 10px; padding: 16px 20px; margin: 0 0 36px; line-height: 1.55; }
+.finding p { margin: 12px 0 0; }
+@media (prefers-color-scheme: dark) {
+  body { background: #0d0d0d; color: #fff; }
+  p.lede, summary { color: #c3c2b7; }
+  figure, .finding { background: #1a1a19; border-color: rgba(255,255,255,.10); }
+  th, td { border-bottom-color: #2c2c2a; }
+}
+</style></head><body><main><h1>queens: backtracking vs genetic search</h1><p class='lede'>Time to a <em>first</em> solution, measured by the solver's own clock. Backtracking is deterministic, so each size is the median of repeated runs. The genetic search is not, and dead-ends often, so each size is several runs: the line is the mean of the wins and the band around it is the fastest to the slowest of them. The cost per solution including the failed runs is in the table below. Genetic search pulls ahead for good at n=28. The cheapest population runs about 1x the board size, or 9x if you want it to succeed most of the time.</p><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 537" width="980" height="537" role="img" aria-label="Time to a first solution: backtracking vs genetic search. Both axes log; each horizontal gridline is 10x the one below. The shaded band is the fastest to the slowest run at each size. Backtracking is absent where it blew the 3-minute cap." class="viz-root" id="crossover">
+<style>
+#crossover text{font-family:system-ui, -apple-system, "Segoe UI", sans-serif;}#crossover .tick{font-size:12px;font-variant-numeric:tabular-nums;}#crossover .title{font-size:17px;font-weight:600;}#crossover .sub,#crossover .legend,#crossover .axis-label{font-size:12.5px;}#crossover .end-label{font-size:12px;font-weight:600;}#crossover .note{font-size:11px;}
+@media (prefers-color-scheme: dark){:root:where(:not([data-theme="light"])) #crossover .surface{fill:#1a1a19;}#crossover .grid{stroke:#2c2c2a;}#crossover .axis{stroke:#383835;}#crossover .ring{stroke:#1a1a19;}#crossover .ink1{fill:#ffffff;}#crossover .ink2{fill:#c3c2b7;}#crossover .ink3{fill:#898781;}#crossover .fill1{fill:#3987e5;}#crossover .line1{stroke:#3987e5;}#crossover .fill2{fill:#d95926;}#crossover .line2{stroke:#d95926;}#crossover .fill3{fill:#199e70;}#crossover .line3{stroke:#199e70;}#crossover .fill4{fill:#c98500;}#crossover .line4{stroke:#c98500;}#crossover .fill5{fill:#d55181;}#crossover .line5{stroke:#d55181;}}
+:root[data-theme="dark"] #crossover .surface{fill:#1a1a19;}#crossover .grid{stroke:#2c2c2a;}#crossover .axis{stroke:#383835;}#crossover .ring{stroke:#1a1a19;}#crossover .ink1{fill:#ffffff;}#crossover .ink2{fill:#c3c2b7;}#crossover .ink3{fill:#898781;}#crossover .fill1{fill:#3987e5;}#crossover .line1{stroke:#3987e5;}#crossover .fill2{fill:#d95926;}#crossover .line2{stroke:#d95926;}#crossover .fill3{fill:#199e70;}#crossover .line3{stroke:#199e70;}#crossover .fill4{fill:#c98500;}#crossover .line4{stroke:#c98500;}#crossover .fill5{fill:#d55181;}#crossover .line5{stroke:#d55181;}
+</style>
+<rect class="surface" width="980" height="537" fill="#fcfcfb"/>
+<text class="title ink1" x="74" y="30" fill="#0b0b0b">Time to a first solution: backtracking vs genetic search</text>
+<text class="sub ink2" x="74" y="52" fill="#52514e">Both axes log; each horizontal gridline is 10x the one below. The shaded band is the fastest to the slowest run at each size. Backtracking</text>
+<text class="sub ink2" x="74" y="69" fill="#52514e">is absent where it blew the 3-minute cap.</text>
+<rect class="fill1" x="74" y="87" width="11" height="11" rx="2.5" fill="#2a78d6"/>
+<text class="legend ink2" x="91" y="97" fill="#52514e">backtracking</text>
+<rect class="fill2" x="192" y="87" width="11" height="11" rx="2.5" fill="#eb6834"/>
+<text class="legend ink2" x="209" y="97" fill="#52514e">genetic mean</text>
+<line class="grid" x1="74" y1="444.3" x2="748" y2="444.3" stroke="#e1e0d9" stroke-width="1"/>
+<text class="tick ink3" x="64" y="448.3" text-anchor="end" fill="#898781">10µs</text>
+<line class="grid" x1="74" y1="399.0" x2="748" y2="399.0" stroke="#e1e0d9" stroke-width="1"/>
+<text class="tick ink3" x="64" y="403.0" text-anchor="end" fill="#898781">100µs</text>
+<line class="grid" x1="74" y1="353.6" x2="748" y2="353.6" stroke="#e1e0d9" stroke-width="1"/>
+<text class="tick ink3" x="64" y="357.6" text-anchor="end" fill="#898781">1ms</text>
+<line class="grid" x1="74" y1="308.3" x2="748" y2="308.3" stroke="#e1e0d9" stroke-width="1"/>
+<text class="tick ink3" x="64" y="312.3" text-anchor="end" fill="#898781">10ms</text>
+<line class="grid" x1="74" y1="263.0" x2="748" y2="263.0" stroke="#e1e0d9" stroke-width="1"/>
+<text class="tick ink3" x="64" y="267.0" text-anchor="end" fill="#898781">100ms</text>
+<line class="grid" x1="74" y1="217.7" x2="748" y2="217.7" stroke="#e1e0d9" stroke-width="1"/>
+<text class="tick ink3" x="64" y="221.7" text-anchor="end" fill="#898781">1s</text>
+<line class="grid" x1="74" y1="172.4" x2="748" y2="172.4" stroke="#e1e0d9" stroke-width="1"/>
+<text class="tick ink3" x="64" y="176.4" text-anchor="end" fill="#898781">10s</text>
+<line class="grid" x1="74" y1="127.0" x2="748" y2="127.0" stroke="#e1e0d9" stroke-width="1"/>
+<text class="tick ink3" x="64" y="131.0" text-anchor="end" fill="#898781">100s</text>
+<text class="tick ink3" x="107.0" y="497" text-anchor="middle" fill="#898781">8</text>
+<text class="tick ink3" x="152.2" y="497" text-anchor="middle" fill="#898781">10</text>
+<text class="tick ink3" x="189.2" y="497" text-anchor="middle" fill="#898781">12</text>
+<text class="tick ink3" x="234.4" y="497" text-anchor="middle" fill="#898781">15</text>
+<text class="tick ink3" x="292.8" y="497" text-anchor="middle" fill="#898781">20</text>
+<text class="tick ink3" x="338.0" y="497" text-anchor="middle" fill="#898781">25</text>
+<text class="tick ink3" x="375.0" y="497" text-anchor="middle" fill="#898781">30</text>
+<text class="tick ink3" x="433.3" y="497" text-anchor="middle" fill="#898781">40</text>
+<text class="tick ink3" x="515.5" y="497" text-anchor="middle" fill="#898781">60</text>
+<text class="tick ink3" x="573.9" y="497" text-anchor="middle" fill="#898781">80</text>
+<text class="tick ink3" x="656.1" y="497" text-anchor="middle" fill="#898781">120</text>
+<text class="tick ink3" x="714.4" y="497" text-anchor="middle" fill="#898781">160</text>
+<line class="axis" x1="74" y1="475" x2="748" y2="475" stroke="#c3c2b7" stroke-width="1"/>
+<text class="axis-label ink2" x="411" y="521" text-anchor="middle" fill="#52514e">board size n</text>
+<text class="axis-label ink2" transform="translate(20,298) rotate(-90)" text-anchor="middle" fill="#52514e">time to first solution</text>
+<line class="axis" x1="361.0" y1="121" x2="361.0" y2="475" stroke="#c3c2b7" stroke-width="1"/>
+<text class="note ink3" x="367.0" y="112.0" text-anchor="start" fill="#898781">genetic ahead from n=28</text>
+<path class="fill2" d="M107.0,352.3 L130.8,345.7 L152.2,326.7 L171.5,324.2 L189.2,267.3 L205.4,263.8 L220.4,288.9 L234.4,244.0 L247.5,296.1 L259.8,264.7 L271.4,281.2 L282.4,270.5 L292.8,256.3 L302.7,266.8 L312.1,273.4 L321.1,252.9 L329.7,280.5 L338.0,235.7 L346.0,257.3 L353.6,240.3 L361.0,233.7 L368.1,247.5 L375.0,232.5 L381.6,248.5 L388.1,241.4 L394.3,229.0 L400.4,233.2 L406.2,241.9 L412.0,229.2 L417.5,221.0 L422.9,233.3 L428.2,218.4 L433.3,229.7 L457.2,213.5 L478.6,223.3 L515.5,208.9 L546.8,200.6 L573.9,187.3 L619.1,167.2 L656.1,151.9 L687.4,151.3 L714.4,140.7 L714.4,155.4 L687.4,177.1 L656.1,179.1 L619.1,181.5 L573.9,224.0 L546.8,223.0 L515.5,232.2 L478.6,250.7 L457.2,260.1 L433.3,274.6 L428.2,265.2 L422.9,258.3 L417.5,264.2 L412.0,269.4 L406.2,284.9 L400.4,287.5 L394.3,285.2 L388.1,280.1 L381.6,290.9 L375.0,286.1 L368.1,293.3 L361.0,282.7 L353.6,282.6 L346.0,296.2 L338.0,303.2 L329.7,301.8 L321.1,307.3 L312.1,295.8 L302.7,308.9 L292.8,306.8 L282.4,306.9 L271.4,312.5 L259.8,314.2 L247.5,316.2 L234.4,342.4 L220.4,338.0 L205.4,326.4 L189.2,328.4 L171.5,342.5 L152.2,353.9 L130.8,372.7 L107.0,369.9 Z" fill="#eb6834" fill-opacity="0.16" stroke="none"/>
+<path class="line1" d="M107.0,454.3 L130.8,468.0 L152.2,457.9 L171.5,468.0 L189.2,440.7 L205.4,448.7 L220.4,392.3 L234.4,406.8 L247.5,368.1 L259.8,373.5 L271.4,329.5 L282.4,388.7 L292.8,302.5 L302.7,364.2 L312.1,259.5 L321.1,341.9 L329.7,287.0 L338.0,326.2 L346.0,286.1 L353.6,285.7 L361.0,246.8 L368.1,261.5 L375.0,188.5 L381.6,217.7 L388.1,180.0 L394.3,169.6 L406.2,157.4 L417.5,127.6" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle class="fill1 ring" cx="107.0" cy="454.3" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=8: 6µs</title></circle>
+<circle class="fill1 ring" cx="130.8" cy="468.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=9: 3µs</title></circle>
+<circle class="fill1 ring" cx="152.2" cy="457.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=10: 5µs</title></circle>
+<circle class="fill1 ring" cx="171.5" cy="468.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=11: 3µs</title></circle>
+<circle class="fill1 ring" cx="189.2" cy="440.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=12: 12µs</title></circle>
+<circle class="fill1 ring" cx="205.4" cy="448.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=13: 8µs</title></circle>
+<circle class="fill1 ring" cx="220.4" cy="392.3" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=14: 140µs</title></circle>
+<circle class="fill1 ring" cx="234.4" cy="406.8" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=15: 67µs</title></circle>
+<circle class="fill1 ring" cx="247.5" cy="368.1" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=16: 479µs</title></circle>
+<circle class="fill1 ring" cx="259.8" cy="373.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=17: 365µs</title></circle>
+<circle class="fill1 ring" cx="271.4" cy="329.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=18: 3ms</title></circle>
+<circle class="fill1 ring" cx="282.4" cy="388.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=19: 168µs</title></circle>
+<circle class="fill1 ring" cx="292.8" cy="302.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=20: 13ms</title></circle>
+<circle class="fill1 ring" cx="302.7" cy="364.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=21: 585µs</title></circle>
+<circle class="fill1 ring" cx="312.1" cy="259.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=22: 120ms</title></circle>
+<circle class="fill1 ring" cx="321.1" cy="341.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=23: 2ms</title></circle>
+<circle class="fill1 ring" cx="329.7" cy="287.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=24: 30ms</title></circle>
+<circle class="fill1 ring" cx="338.0" cy="326.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=25: 4ms</title></circle>
+<circle class="fill1 ring" cx="346.0" cy="286.1" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=26: 31ms</title></circle>
+<circle class="fill1 ring" cx="353.6" cy="285.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=27: 32ms</title></circle>
+<circle class="fill1 ring" cx="361.0" cy="246.8" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=28: 227ms</title></circle>
+<circle class="fill1 ring" cx="368.1" cy="261.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=29: 108ms</title></circle>
+<circle class="fill1 ring" cx="375.0" cy="188.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=30: 4s</title></circle>
+<circle class="fill1 ring" cx="381.6" cy="217.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=31: 998ms</title></circle>
+<circle class="fill1 ring" cx="388.1" cy="180.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=32: 7s</title></circle>
+<circle class="fill1 ring" cx="394.3" cy="169.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=33: 11s</title></circle>
+<circle class="fill1 ring" cx="406.2" cy="157.4" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=35: 21s</title></circle>
+<circle class="fill1 ring" cx="417.5" cy="127.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>backtracking, n=37: 97s</title></circle>
+<path class="line2" d="M107.0,358.2 L130.8,353.1 L152.2,340.3 L171.5,331.8 L189.2,297.7 L205.4,293.0 L220.4,305.9 L234.4,266.1 L247.5,304.0 L259.8,284.2 L271.4,295.2 L282.4,287.9 L292.8,277.0 L302.7,286.7 L312.1,283.8 L321.1,270.2 L329.7,289.0 L338.0,266.0 L346.0,272.7 L353.6,261.2 L361.0,251.1 L368.1,263.5 L375.0,248.3 L381.6,262.3 L388.1,255.9 L394.3,253.3 L400.4,251.8 L406.2,259.2 L412.0,249.3 L417.5,243.1 L422.9,244.6 L428.2,239.5 L433.3,249.0 L457.2,231.3 L478.6,230.8 L515.5,215.8 L546.8,207.8 L573.9,196.2 L619.1,171.8 L656.1,162.9 L687.4,160.4 L714.4,146.7" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle class="fill2 ring" cx="107.0" cy="358.2" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=8: mean 794µs, fastest 438µs, slowest 1ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="130.8" cy="353.1" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=9: mean 1ms, fastest 380µs, slowest 1ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="152.2" cy="340.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=10: mean 2ms, fastest 988µs, slowest 4ms (5 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="171.5" cy="331.8" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=11: mean 3ms, fastest 2ms, slowest 4ms (4 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="189.2" cy="297.7" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=12: mean 17ms, fastest 4ms, slowest 80ms (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="205.4" cy="293.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=13: mean 22ms, fastest 4ms, slowest 96ms (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="220.4" cy="305.9" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=14: mean 11ms, fastest 2ms, slowest 27ms (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="234.4" cy="266.1" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=15: mean 86ms, fastest 2ms, slowest 262ms (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="247.5" cy="304.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=16: mean 12ms, fastest 7ms, slowest 19ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="259.8" cy="284.2" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=17: mean 34ms, fastest 7ms, slowest 92ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="271.4" cy="295.2" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=18: mean 20ms, fastest 8ms, slowest 40ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="282.4" cy="287.9" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=19: mean 28ms, fastest 11ms, slowest 68ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="292.8" cy="277.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=20: mean 49ms, fastest 11ms, slowest 141ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="302.7" cy="286.7" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=21: mean 30ms, fastest 10ms, slowest 82ms (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="312.1" cy="283.8" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=22: mean 35ms, fastest 19ms, slowest 59ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="321.1" cy="270.2" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=23: mean 69ms, fastest 11ms, slowest 167ms (5 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="329.7" cy="289.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=24: mean 27ms, fastest 14ms, slowest 41ms (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="338.0" cy="266.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=25: mean 86ms, fastest 13ms, slowest 400ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="346.0" cy="272.7" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=26: mean 61ms, fastest 19ms, slowest 133ms (5 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="353.6" cy="261.2" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=27: mean 109ms, fastest 37ms, slowest 317ms (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="361.0" cy="251.1" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=28: mean 183ms, fastest 37ms, slowest 443ms (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="368.1" cy="263.5" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=29: mean 97ms, fastest 21ms, slowest 219ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="375.0" cy="248.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=30: mean 210ms, fastest 31ms, slowest 471ms (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="381.6" cy="262.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=31: mean 103ms, fastest 24ms, slowest 209ms (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="388.1" cy="255.9" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=32: mean 143ms, fastest 42ms, slowest 300ms (5 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="394.3" cy="253.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=33: mean 163ms, fastest 32ms, slowest 562ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="400.4" cy="251.8" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=34: mean 177ms, fastest 29ms, slowest 454ms (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="406.2" cy="259.2" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=35: mean 121ms, fastest 33ms, slowest 292ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="412.0" cy="249.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=36: mean 200ms, fastest 72ms, slowest 557ms (5 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="417.5" cy="243.1" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=37: mean 274ms, fastest 94ms, slowest 846ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="422.9" cy="244.6" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=38: mean 255ms, fastest 127ms, slowest 453ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="428.2" cy="239.5" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=39: mean 329ms, fastest 90ms, slowest 962ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="433.3" cy="249.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=40: mean 204ms, fastest 56ms, slowest 544ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="457.2" cy="231.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=45: mean 500ms, fastest 116ms, slowest 1s (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="478.6" cy="230.8" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=50: mean 514ms, fastest 187ms, slowest 752ms (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="515.5" cy="215.8" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=60: mean 1s, fastest 478ms, slowest 2s (4 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="546.8" cy="207.8" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=70: mean 2s, fastest 762ms, slowest 2s (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="573.9" cy="196.2" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=80: mean 3s, fastest 727ms, slowest 5s (5 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="619.1" cy="171.8" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=100: mean 10s, fastest 6s, slowest 13s (4 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="656.1" cy="162.9" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=120: mean 16s, fastest 7s, slowest 28s (7 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="687.4" cy="160.4" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=140: mean 18s, fastest 8s, slowest 29s (6 of 7 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="714.4" cy="146.7" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>genetic, n=160: mean 37s, fastest 24s, slowest 50s (2 of 5 runs succeeded)</title></circle>
+<text class="end-label fill1" x="429.5" y="131.6" fill="#2a78d6">backtracking</text>
+<text class="end-label fill2" x="726.4" y="150.7" fill="#eb6834">genetic mean</text>
+</svg></figure><details><summary>Table view: crossover data</summary><table><thead><tr><th>n</th><th>backtracking</th><th>genetic mean</th><th>genetic with retries</th><th>genetic runs solved</th></tr></thead><tbody><tr><td>8</td><td>6µs</td><td>794µs</td><td>794µs</td><td>7/7</td></tr><tr><td>9</td><td>3µs</td><td>1ms</td><td>1ms</td><td>7/7</td></tr><tr><td>10</td><td>5µs</td><td>2ms</td><td>37ms</td><td>5/7</td></tr><tr><td>11</td><td>3µs</td><td>3ms</td><td>92ms</td><td>4/7</td></tr><tr><td>12</td><td>12µs</td><td>17ms</td><td>37ms</td><td>6/7</td></tr><tr><td>13</td><td>8µs</td><td>22ms</td><td>61ms</td><td>6/7</td></tr><tr><td>14</td><td>140µs</td><td>11ms</td><td>38ms</td><td>6/7</td></tr><tr><td>15</td><td>67µs</td><td>86ms</td><td>120ms</td><td>6/7</td></tr><tr><td>16</td><td>479µs</td><td>12ms</td><td>12ms</td><td>7/7</td></tr><tr><td>17</td><td>365µs</td><td>34ms</td><td>34ms</td><td>7/7</td></tr><tr><td>18</td><td>3ms</td><td>20ms</td><td>20ms</td><td>7/7</td></tr><tr><td>19</td><td>168µs</td><td>28ms</td><td>28ms</td><td>7/7</td></tr><tr><td>20</td><td>13ms</td><td>49ms</td><td>49ms</td><td>7/7</td></tr><tr><td>21</td><td>585µs</td><td>30ms</td><td>83ms</td><td>6/7</td></tr><tr><td>22</td><td>120ms</td><td>35ms</td><td>35ms</td><td>7/7</td></tr><tr><td>23</td><td>2ms</td><td>69ms</td><td>197ms</td><td>5/7</td></tr><tr><td>24</td><td>30ms</td><td>27ms</td><td>88ms</td><td>6/7</td></tr><tr><td>25</td><td>4ms</td><td>86ms</td><td>86ms</td><td>7/7</td></tr><tr><td>26</td><td>31ms</td><td>61ms</td><td>231ms</td><td>5/7</td></tr><tr><td>27</td><td>32ms</td><td>109ms</td><td>165ms</td><td>6/7</td></tr><tr><td>28</td><td>227ms</td><td>183ms</td><td>246ms</td><td>6/7</td></tr><tr><td>29</td><td>108ms</td><td>97ms</td><td>97ms</td><td>7/7</td></tr><tr><td>30</td><td>4s</td><td>210ms</td><td>294ms</td><td>6/7</td></tr><tr><td>31</td><td>998ms</td><td>103ms</td><td>191ms</td><td>6/7</td></tr><tr><td>32</td><td>7s</td><td>143ms</td><td>373ms</td><td>5/7</td></tr><tr><td>33</td><td>11s</td><td>163ms</td><td>163ms</td><td>7/7</td></tr><tr><td>34</td><td>over the limit</td><td>177ms</td><td>271ms</td><td>6/7</td></tr><tr><td>35</td><td>21s</td><td>121ms</td><td>121ms</td><td>7/7</td></tr><tr><td>36</td><td>over the limit</td><td>200ms</td><td>473ms</td><td>5/7</td></tr><tr><td>37</td><td>97s</td><td>274ms</td><td>274ms</td><td>7/7</td></tr><tr><td>38</td><td>over the limit</td><td>255ms</td><td>255ms</td><td>7/7</td></tr><tr><td>39</td><td>over the limit</td><td>329ms</td><td>329ms</td><td>7/7</td></tr><tr><td>40</td><td>over the limit</td><td>204ms</td><td>204ms</td><td>7/7</td></tr><tr><td>45</td><td>over the limit</td><td>500ms</td><td>966ms</td><td>6/7</td></tr><tr><td>50</td><td>over the limit</td><td>514ms</td><td>514ms</td><td>7/7</td></tr><tr><td>60</td><td>over the limit</td><td>1s</td><td>4s</td><td>4/7</td></tr><tr><td>70</td><td>over the limit</td><td>2s</td><td>3s</td><td>6/7</td></tr><tr><td>80</td><td>over the limit</td><td>3s</td><td>5s</td><td>5/7</td></tr><tr><td>100</td><td>over the limit</td><td>10s</td><td>21s</td><td>4/7</td></tr><tr><td>120</td><td>over the limit</td><td>16s</td><td>16s</td><td>7/7</td></tr><tr><td>140</td><td>over the limit</td><td>18s</td><td>26s</td><td>6/7</td></tr><tr><td>160</td><td>over the limit</td><td>37s</td><td>111s</td><td>2/5</td></tr></tbody></table></details><div class='finding'><strong>Population that pays best, per board size</strong><table><thead><tr><th>n</th><th>cheapest</th><th>/ n</th><th>per solution</th><th>cheapest that wins 2 runs in 3</th><th>/ n</th><th>per solution</th></tr></thead><tbody><tr><td>20</td><td>25</td><td>1.2</td><td>8ms</td><td>400</td><td>20.0</td><td>9ms</td></tr><tr><td>40</td><td>25</td><td>0.6</td><td>64ms</td><td>200</td><td>5.0</td><td>117ms</td></tr><tr><td>80</td><td>200</td><td>2.5</td><td>925ms</td><td>200</td><td>2.5</td><td>925ms</td></tr><tr><td>120</td><td>25</td><td>0.2</td><td>4s</td><td>1600</td><td>13.3</td><td>32s</td></tr><tr><td>160</td><td>400</td><td>2.5</td><td>38s</td><td>-</td><td>-</td><td>-</td></tr></tbody></table><p>Median ratio <strong>1.2 x n</strong> (range 0.2 to 2.5); restricted to populations that win two runs in three, <strong>9.2 x n</strong>.</p></div><figure><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" width="980" height="520" role="img" aria-label="Genetic search: population size against time to a first solution. Both axes log. Failed runs are counted, so this is what a solution really costs." class="viz-root" id="population">
+<style>
+#population text{font-family:system-ui, -apple-system, "Segoe UI", sans-serif;}#population .tick{font-size:12px;font-variant-numeric:tabular-nums;}#population .title{font-size:17px;font-weight:600;}#population .sub,#population .legend,#population .axis-label{font-size:12.5px;}#population .end-label{font-size:12px;font-weight:600;}#population .note{font-size:11px;}
+@media (prefers-color-scheme: dark){:root:where(:not([data-theme="light"])) #population .surface{fill:#1a1a19;}#population .grid{stroke:#2c2c2a;}#population .axis{stroke:#383835;}#population .ring{stroke:#1a1a19;}#population .ink1{fill:#ffffff;}#population .ink2{fill:#c3c2b7;}#population .ink3{fill:#898781;}#population .fill1{fill:#3987e5;}#population .line1{stroke:#3987e5;}#population .fill2{fill:#d95926;}#population .line2{stroke:#d95926;}#population .fill3{fill:#199e70;}#population .line3{stroke:#199e70;}#population .fill4{fill:#c98500;}#population .line4{stroke:#c98500;}#population .fill5{fill:#d55181;}#population .line5{stroke:#d55181;}}
+:root[data-theme="dark"] #population .surface{fill:#1a1a19;}#population .grid{stroke:#2c2c2a;}#population .axis{stroke:#383835;}#population .ring{stroke:#1a1a19;}#population .ink1{fill:#ffffff;}#population .ink2{fill:#c3c2b7;}#population .ink3{fill:#898781;}#population .fill1{fill:#3987e5;}#population .line1{stroke:#3987e5;}#population .fill2{fill:#d95926;}#population .line2{stroke:#d95926;}#population .fill3{fill:#199e70;}#population .line3{stroke:#199e70;}#population .fill4{fill:#c98500;}#population .line4{stroke:#c98500;}#population .fill5{fill:#d55181;}#population .line5{stroke:#d55181;}
+</style>
+<rect class="surface" width="980" height="520" fill="#fcfcfb"/>
+<text class="title ink1" x="74" y="30" fill="#0b0b0b">Genetic search: population size against time to a first solution</text>
+<text class="sub ink2" x="74" y="52" fill="#52514e">Both axes log. Failed runs are counted, so this is what a solution really costs.</text>
+<rect class="fill1" x="74" y="70" width="11" height="11" rx="2.5" fill="#2a78d6"/>
+<text class="legend ink2" x="91" y="80" fill="#52514e">n=20</text>
+<rect class="fill2" x="135" y="70" width="11" height="11" rx="2.5" fill="#eb6834"/>
+<text class="legend ink2" x="152" y="80" fill="#52514e">n=40</text>
+<rect class="fill3" x="196" y="70" width="11" height="11" rx="2.5" fill="#1baf7a"/>
+<text class="legend ink2" x="213" y="80" fill="#52514e">n=80</text>
+<rect class="fill4" x="256" y="70" width="11" height="11" rx="2.5" fill="#eda100"/>
+<text class="legend ink2" x="273" y="80" fill="#52514e">n=120</text>
+<rect class="fill5" x="324" y="70" width="11" height="11" rx="2.5" fill="#e87ba4"/>
+<text class="legend ink2" x="341" y="80" fill="#52514e">n=160</text>
+<line class="grid" x1="74" y1="438.5" x2="748" y2="438.5" stroke="#e1e0d9" stroke-width="1"/>
+<text class="tick ink3" x="64" y="442.5" text-anchor="end" fill="#898781">10ms</text>
+<line class="grid" x1="74" y1="362.6" x2="748" y2="362.6" stroke="#e1e0d9" stroke-width="1"/>
+<text class="tick ink3" x="64" y="366.6" text-anchor="end" fill="#898781">100ms</text>
+<line class="grid" x1="74" y1="286.7" x2="748" y2="286.7" stroke="#e1e0d9" stroke-width="1"/>
+<text class="tick ink3" x="64" y="290.7" text-anchor="end" fill="#898781">1s</text>
+<line class="grid" x1="74" y1="210.8" x2="748" y2="210.8" stroke="#e1e0d9" stroke-width="1"/>
+<text class="tick ink3" x="64" y="214.8" text-anchor="end" fill="#898781">10s</text>
+<line class="grid" x1="74" y1="134.9" x2="748" y2="134.9" stroke="#e1e0d9" stroke-width="1"/>
+<text class="tick ink3" x="64" y="138.9" text-anchor="end" fill="#898781">100s</text>
+<text class="tick ink3" x="92.7" y="480" text-anchor="middle" fill="#898781">25</text>
+<text class="tick ink3" x="172.2" y="480" text-anchor="middle" fill="#898781">50</text>
+<text class="tick ink3" x="251.7" y="480" text-anchor="middle" fill="#898781">100</text>
+<text class="tick ink3" x="331.3" y="480" text-anchor="middle" fill="#898781">200</text>
+<text class="tick ink3" x="410.8" y="480" text-anchor="middle" fill="#898781">400</text>
+<text class="tick ink3" x="490.4" y="480" text-anchor="middle" fill="#898781">800</text>
+<text class="tick ink3" x="569.9" y="480" text-anchor="middle" fill="#898781">1600</text>
+<text class="tick ink3" x="649.5" y="480" text-anchor="middle" fill="#898781">3200</text>
+<text class="tick ink3" x="729.0" y="480" text-anchor="middle" fill="#898781">6400</text>
+<line class="axis" x1="74" y1="458" x2="748" y2="458" stroke="#c3c2b7" stroke-width="1"/>
+<text class="axis-label ink2" x="411" y="504" text-anchor="middle" fill="#52514e">population</text>
+<text class="axis-label ink2" transform="translate(20,281) rotate(-90)" text-anchor="middle" fill="#52514e">time per solution found</text>
+<path class="line1" d="M92.7,446.2 L172.2,422.9 L251.7,418.0 L331.3,434.1 L410.8,443.6 L490.4,409.2 L569.9,383.5 L649.5,344.7 L729.0,358.8" fill="none" stroke="#2a78d6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle class="fill1 ring" cx="92.7" cy="446.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>n=20, population 25: 8ms per solution (5 of 9 runs succeeded)</title></circle>
+<circle class="fill1 ring" cx="172.2" cy="422.9" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>n=20, population 50: 16ms per solution (5 of 9 runs succeeded)</title></circle>
+<circle class="fill1 ring" cx="251.7" cy="418.0" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>n=20, population 100: 19ms per solution (7 of 9 runs succeeded)</title></circle>
+<circle class="fill1 ring" cx="331.3" cy="434.1" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>n=20, population 200: 11ms per solution (9 of 9 runs succeeded)</title></circle>
+<circle class="fill1 ring" cx="410.8" cy="443.6" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>n=20, population 400: 9ms per solution (9 of 9 runs succeeded)</title></circle>
+<circle class="fill1 ring" cx="490.4" cy="409.2" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>n=20, population 800: 24ms per solution (9 of 9 runs succeeded)</title></circle>
+<circle class="fill1 ring" cx="569.9" cy="383.5" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>n=20, population 1600: 53ms per solution (9 of 9 runs succeeded)</title></circle>
+<circle class="fill1 ring" cx="649.5" cy="344.7" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>n=20, population 3200: 172ms per solution (8 of 9 runs succeeded)</title></circle>
+<circle class="fill1 ring" cx="729.0" cy="358.8" r="4" fill="#2a78d6" stroke="#fcfcfb" stroke-width="2"><title>n=20, population 6400: 112ms per solution (9 of 9 runs succeeded)</title></circle>
+<path class="line2" d="M92.7,377.1 L172.2,356.0 L251.7,355.3 L331.3,357.3 L410.8,356.5 L490.4,326.1 L569.9,324.8 L649.5,288.9 L729.0,303.1" fill="none" stroke="#eb6834" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle class="fill2 ring" cx="92.7" cy="377.1" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>n=40, population 25: 64ms per solution (4 of 9 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="172.2" cy="356.0" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>n=40, population 50: 122ms per solution (4 of 9 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="251.7" cy="355.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>n=40, population 100: 125ms per solution (6 of 9 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="331.3" cy="357.3" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>n=40, population 200: 117ms per solution (8 of 9 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="410.8" cy="356.5" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>n=40, population 400: 120ms per solution (9 of 9 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="490.4" cy="326.1" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>n=40, population 800: 302ms per solution (9 of 9 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="569.9" cy="324.8" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>n=40, population 1600: 315ms per solution (9 of 9 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="649.5" cy="288.9" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>n=40, population 3200: 934ms per solution (8 of 9 runs succeeded)</title></circle>
+<circle class="fill2 ring" cx="729.0" cy="303.1" r="4" fill="#eb6834" stroke="#fcfcfb" stroke-width="2"><title>n=40, population 6400: 607ms per solution (9 of 9 runs succeeded)</title></circle>
+<path class="line3" d="M251.7,272.7 L331.3,289.2 L410.8,261.2 L490.4,269.1 L569.9,249.5 L649.5,242.3 L729.0,212.2" fill="none" stroke="#1baf7a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle class="fill3 ring" cx="251.7" cy="272.7" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>n=80, population 100: 2s per solution (3 of 9 runs succeeded)</title></circle>
+<circle class="fill3 ring" cx="331.3" cy="289.2" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>n=80, population 200: 925ms per solution (7 of 9 runs succeeded)</title></circle>
+<circle class="fill3 ring" cx="410.8" cy="261.2" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>n=80, population 400: 2s per solution (5 of 9 runs succeeded)</title></circle>
+<circle class="fill3 ring" cx="490.4" cy="269.1" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>n=80, population 800: 2s per solution (8 of 9 runs succeeded)</title></circle>
+<circle class="fill3 ring" cx="569.9" cy="249.5" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>n=80, population 1600: 3s per solution (8 of 9 runs succeeded)</title></circle>
+<circle class="fill3 ring" cx="649.5" cy="242.3" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>n=80, population 3200: 4s per solution (8 of 9 runs succeeded)</title></circle>
+<circle class="fill3 ring" cx="729.0" cy="212.2" r="4" fill="#1baf7a" stroke="#fcfcfb" stroke-width="2"><title>n=80, population 6400: 10s per solution (8 of 9 runs succeeded)</title></circle>
+<path class="line4" d="M92.7,238.2 L172.2,220.4 L251.7,203.7 L331.3,236.0 L410.8,219.2 L490.4,184.4 L569.9,172.0 L649.5,171.5 L729.0,131.0" fill="none" stroke="#eda100" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle class="fill4 ring" cx="92.7" cy="238.2" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>n=120, population 25: 4s per solution (1 of 9 runs succeeded)</title></circle>
+<circle class="fill4 ring" cx="172.2" cy="220.4" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>n=120, population 50: 7s per solution (1 of 9 runs succeeded)</title></circle>
+<circle class="fill4 ring" cx="251.7" cy="203.7" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>n=120, population 100: 12s per solution (1 of 9 runs succeeded)</title></circle>
+<circle class="fill4 ring" cx="331.3" cy="236.0" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>n=120, population 200: 5s per solution (5 of 9 runs succeeded)</title></circle>
+<circle class="fill4 ring" cx="410.8" cy="219.2" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>n=120, population 400: 8s per solution (5 of 9 runs succeeded)</title></circle>
+<circle class="fill4 ring" cx="490.4" cy="184.4" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>n=120, population 800: 22s per solution (4 of 9 runs succeeded)</title></circle>
+<circle class="fill4 ring" cx="569.9" cy="172.0" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>n=120, population 1600: 32s per solution (6 of 9 runs succeeded)</title></circle>
+<circle class="fill4 ring" cx="649.5" cy="171.5" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>n=120, population 3200: 33s per solution (7 of 9 runs succeeded)</title></circle>
+<circle class="fill4 ring" cx="729.0" cy="131.0" r="4" fill="#eda100" stroke="#fcfcfb" stroke-width="2"><title>n=120, population 6400: 113s per solution (3 of 9 runs succeeded)</title></circle>
+<path class="line5" d="M251.7,153.5 L331.3,138.5 L410.8,167.0 L490.4,134.1 L569.9,115.1 L649.5,139.5 L729.0,137.5" fill="none" stroke="#e87ba4" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle class="fill5 ring" cx="251.7" cy="153.5" r="4" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>n=160, population 100: 57s per solution (1 of 9 runs succeeded)</title></circle>
+<circle class="fill5 ring" cx="331.3" cy="138.5" r="4" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>n=160, population 200: 90s per solution (1 of 9 runs succeeded)</title></circle>
+<circle class="fill5 ring" cx="410.8" cy="167.0" r="4" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>n=160, population 400: 38s per solution (4 of 9 runs succeeded)</title></circle>
+<circle class="fill5 ring" cx="490.4" cy="134.1" r="4" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>n=160, population 800: 102s per solution (3 of 9 runs succeeded)</title></circle>
+<circle class="fill5 ring" cx="569.9" cy="115.1" r="4" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>n=160, population 1600: 182s per solution (2 of 9 runs succeeded)</title></circle>
+<circle class="fill5 ring" cx="649.5" cy="139.5" r="4" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>n=160, population 3200: 87s per solution (4 of 9 runs succeeded)</title></circle>
+<circle class="fill5 ring" cx="729.0" cy="137.5" r="4" fill="#e87ba4" stroke="#fcfcfb" stroke-width="2"><title>n=160, population 6400: 92s per solution (4 of 9 runs succeeded)</title></circle>
+<text class="end-label fill4" x="741.0" y="135.0" fill="#eda100">n=120</text>
+<text class="end-label fill5" x="741.0" y="150.0" fill="#e87ba4">n=160</text>
+<text class="end-label fill3" x="741.0" y="216.2" fill="#1baf7a">n=80</text>
+<text class="end-label fill2" x="741.0" y="307.1" fill="#eb6834">n=40</text>
+<text class="end-label fill1" x="741.0" y="362.8" fill="#2a78d6">n=20</text>
+</svg></figure><details><summary>Table view: population data</summary><table><thead><tr><th>n</th><th>population</th><th>population / n</th><th>mean of successes</th><th>per solution with retries</th><th>runs solved</th></tr></thead><tbody><tr><td>20</td><td>25</td><td>1.2</td><td>2ms</td><td>8ms</td><td>5/9</td></tr><tr><td>20</td><td>50</td><td>2.5</td><td>5ms</td><td>16ms</td><td>5/9</td></tr><tr><td>20</td><td>100</td><td>5.0</td><td>10ms</td><td>19ms</td><td>7/9</td></tr><tr><td>20</td><td>200</td><td>10.0</td><td>11ms</td><td>11ms</td><td>9/9</td></tr><tr><td>20</td><td>400</td><td>20.0</td><td>9ms</td><td>9ms</td><td>9/9</td></tr><tr><td>20</td><td>800</td><td>40.0</td><td>24ms</td><td>24ms</td><td>9/9</td></tr><tr><td>20</td><td>1600</td><td>80.0</td><td>53ms</td><td>53ms</td><td>9/9</td></tr><tr><td>20</td><td>3200</td><td>160.0</td><td>61ms</td><td>172ms</td><td>8/9</td></tr><tr><td>20</td><td>6400</td><td>320.0</td><td>112ms</td><td>112ms</td><td>9/9</td></tr><tr><td>40</td><td>25</td><td>0.6</td><td>20ms</td><td>64ms</td><td>4/9</td></tr><tr><td>40</td><td>50</td><td>1.2</td><td>32ms</td><td>122ms</td><td>4/9</td></tr><tr><td>40</td><td>100</td><td>2.5</td><td>62ms</td><td>125ms</td><td>6/9</td></tr><tr><td>40</td><td>200</td><td>5.0</td><td>90ms</td><td>117ms</td><td>8/9</td></tr><tr><td>40</td><td>400</td><td>10.0</td><td>120ms</td><td>120ms</td><td>9/9</td></tr><tr><td>40</td><td>800</td><td>20.0</td><td>302ms</td><td>302ms</td><td>9/9</td></tr><tr><td>40</td><td>1600</td><td>40.0</td><td>315ms</td><td>315ms</td><td>9/9</td></tr><tr><td>40</td><td>3200</td><td>80.0</td><td>501ms</td><td>934ms</td><td>8/9</td></tr><tr><td>40</td><td>6400</td><td>160.0</td><td>607ms</td><td>607ms</td><td>9/9</td></tr><tr><td>80</td><td>25</td><td>0.3</td><td>never solved</td><td>-</td><td>0/9</td></tr><tr><td>80</td><td>50</td><td>0.6</td><td>never solved</td><td>-</td><td>0/9</td></tr><tr><td>80</td><td>100</td><td>1.2</td><td>422ms</td><td>2s</td><td>3/9</td></tr><tr><td>80</td><td>200</td><td>2.5</td><td>586ms</td><td>925ms</td><td>7/9</td></tr><tr><td>80</td><td>400</td><td>5.0</td><td>760ms</td><td>2s</td><td>5/9</td></tr><tr><td>80</td><td>800</td><td>10.0</td><td>1s</td><td>2s</td><td>8/9</td></tr><tr><td>80</td><td>1600</td><td>20.0</td><td>2s</td><td>3s</td><td>8/9</td></tr><tr><td>80</td><td>3200</td><td>40.0</td><td>2s</td><td>4s</td><td>8/9</td></tr><tr><td>80</td><td>6400</td><td>80.0</td><td>6s</td><td>10s</td><td>8/9</td></tr><tr><td>120</td><td>25</td><td>0.2</td><td>210ms</td><td>4s</td><td>1/9</td></tr><tr><td>120</td><td>50</td><td>0.4</td><td>393ms</td><td>7s</td><td>1/9</td></tr><tr><td>120</td><td>100</td><td>0.8</td><td>1s</td><td>12s</td><td>1/9</td></tr><tr><td>120</td><td>200</td><td>1.7</td><td>2s</td><td>5s</td><td>5/9</td></tr><tr><td>120</td><td>400</td><td>3.3</td><td>3s</td><td>8s</td><td>5/9</td></tr><tr><td>120</td><td>800</td><td>6.7</td><td>5s</td><td>22s</td><td>4/9</td></tr><tr><td>120</td><td>1600</td><td>13.3</td><td>16s</td><td>32s</td><td>6/9</td></tr><tr><td>120</td><td>3200</td><td>26.7</td><td>20s</td><td>33s</td><td>7/9</td></tr><tr><td>120</td><td>6400</td><td>53.3</td><td>22s</td><td>113s</td><td>3/9</td></tr><tr><td>160</td><td>25</td><td>0.2</td><td>never solved</td><td>-</td><td>0/9</td></tr><tr><td>160</td><td>50</td><td>0.3</td><td>never solved</td><td>-</td><td>0/9</td></tr><tr><td>160</td><td>100</td><td>0.6</td><td>4s</td><td>57s</td><td>1/9</td></tr><tr><td>160</td><td>200</td><td>1.2</td><td>10s</td><td>90s</td><td>1/9</td></tr><tr><td>160</td><td>400</td><td>2.5</td><td>14s</td><td>38s</td><td>4/9</td></tr><tr><td>160</td><td>800</td><td>5.0</td><td>22s</td><td>102s</td><td>3/9</td></tr><tr><td>160</td><td>1600</td><td>10.0</td><td>25s</td><td>182s</td><td>2/9</td></tr><tr><td>160</td><td>3200</td><td>20.0</td><td>31s</td><td>87s</td><td>4/9</td></tr><tr><td>160</td><td>6400</td><td>40.0</td><td>36s</td><td>92s</td><td>4/9</td></tr></tbody></table></details></main></body></html>
