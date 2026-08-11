@@ -1,0 +1,47 @@
+# CMake build directories
+build/
+build-*/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+
+# C compiler artifacts
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.exe
+*.out
+
+# Borland/Turbo C legacy artifacts
+*.tds
+*.map
+*.tpu
+*.lib
+*.ilk
+*.pdb
+*.bbs
+*.bmk
+*.lks
+*.stat
+*.cfg
+
+# Runtime output files
+*.log
+
+# IDE and editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-*
+
+# Python bytecode from tools/
+__pycache__/
+
+# Unredacted provenance lives only in the private repo
+PROVENANCE.unredacted.md
