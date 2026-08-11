@@ -112,6 +112,8 @@ Results, and the machine and binary that produced them, are in `bench/`.
 
 ### Board size
 
+![Time to a first solution, backtracking against genetic search. Both axes logarithmic; the band spans the fastest to the slowest genetic run at each size.](bench/crossover.svg)
+
 Backtracking is about a hundred times faster at n=8 and holds the lead to n=27,
 dropping only n=22 and n=24 on the way. Its cost does not grow smoothly. Whether
 the first solution sits early or late in the depth-first order has nothing to do
@@ -168,6 +170,8 @@ roughly 2e-16 of the node fit's estimate, at 9.1M nodes/s, continuing the
 throughput decline. All the run establishes is "not soon".
 
 ### Population size
+
+![Genetic search, population size against time to a first solution. Both axes logarithmic; failed runs are counted, so this is what a solution really costs.](bench/population.svg)
 
 Population swept from 25 to 6400 across five board sizes, nine runs each.
 
