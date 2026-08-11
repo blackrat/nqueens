@@ -124,6 +124,47 @@ Past n=37 backtracking exceeds 180s at most sizes. Genetic search still returns
 a solution in about 200ms, and runs out around n=160: 3 successes in 7,
 averaging 14s.
 
+#### Growth, and why extrapolating it is a trap
+
+Least squares over all 28 measured sizes:
+
+```
+log10(nodes)   = 0.254*n - 0.62     R2 = 0.93
+log10(seconds) = 0.261*n - 7.94     R2 = 0.94
+```
+
+About 1.8x more work for each queen added. The R2 flatters it. Residuals span
+0.1x to 18x of the fitted line: n=29 came in at 0.24x, n=30 at 5.5x, n=33 at
+2.3x. More runs will not smooth that out, because backtracking is deterministic
+- each n has exactly one cost. The variation is across sizes, not across trials,
+so it is structure rather than noise.
+
+This is the heavy-tailed behaviour Gomes, Selman and Crato identified in
+backtracking search: the runtime distribution has tails fat enough that the mean
+stops being a useful summary and can fail to converge at all, so any
+extrapolation systematically understates the bad cases. Their paper also gives
+the practical remedy, which is random restarts - the genetic search here gets
+much the same benefit for free, by being restartable.
+
+Prefer the node fit to the seconds fit if you want to carry it to another
+machine: node count is hardware-independent, while throughput drifted from
+14.2M nodes/s at n=29 to 10.4M at n=37 as the recursion deepened.
+
+How badly this fails at distance is worth being concrete about. For n=100 the
+two fits above - least squares over the *same* 28 points - disagree with each
+other by 2.25x:
+
+| | prediction for n=100 |
+| --- | --- |
+| node fit | 6.4e24 nodes, about 22 billion years at measured throughput |
+| seconds fit | 1.6e18 seconds, about 50 billion years |
+
+Both are past the age of the universe, so the disagreement hardly matters, but
+it shows the arithmetic is not carrying real information that far out. Measured,
+n=100 ran for 600s and explored 5,466,619,904 nodes without finding a solution -
+roughly 1e-15 of the node fit's estimate, at 9.1M nodes/s, continuing the
+throughput decline. All the run establishes is "not soon".
+
 ### Population size
 
 Population swept from 25 to 6400 across five board sizes, nine runs each.
@@ -152,3 +193,91 @@ costs about 4s per solution against 13s for population 3200.
 
 The default is 10n, floored at 400: the smallest population that wins reliably,
 since the program does not retry for you. `-p` overrides it.
+
+### Complexity, and why it does not predict the time
+
+Per step, the two are not close:
+
+| | work per step | steps | bound |
+| --- | --- | --- | --- |
+| backtracking | O(1) per node - three flag lookups | search tree | O(n!) worst case, no polynomial bound known |
+| genetic | O(n^2) per fitness evaluation, so O(P n^2) per generation with population P; O(n^3) at the default P=10n | generations | none - it can stall and never converge |
+
+Those two bounds are not comparable in any useful way, and the measured
+crossover at n=30 is not predicted by either of them. Several reasons, and they
+generalise past this program:
+
+**Worst case is not observed case.** Backtracking's O(n!) is the unpruned
+permutation tree. Measured, its node count grows about 1.8^n - still exponential,
+but astronomically below the bound. Big-O tracked the wrong quantity.
+
+**One of them has no bound at all.** The genetic search is not guaranteed to
+terminate with a solution. Comparing "O(n!)" against "no bound" tells you
+nothing about which returns first at n=40, which is the question actually being
+asked.
+
+**Constants dominate over the range anyone runs.** Backtracking does about three
+array operations per node and sustains 10-14M nodes/s. A single genetic fitness
+evaluation is O(n^2): at n=100 that is 10,000 operations per individual and
+about 10^7 per generation. Complexity notation discards exactly the factor that
+decides the race here.
+
+**The machine intrudes.** Node throughput fell from 14.2M/s at n=29 to 10.4M/s
+at n=37 purely from deeper recursion and worse cache behaviour. Nothing in the
+asymptotics predicts a 27% slowdown in the constant.
+
+**The mean may not exist.** With heavy-tailed runtimes, average-case complexity
+is not a well-defined thing to quote, let alone to compare.
+
+Complexity does predict time when work per step is uniform and step count is
+tightly concentrated. Neither holds here: step costs differ by orders of
+magnitude between the two, and backtracking's step count varies by 18x between
+adjacent board sizes.
+
+The sharpest illustration is not in this repository. Min-conflicts - start from
+a full assignment and repeatedly move the most-attacked queen - carries the same
+uninformative worst case, and solves n-queens for n = 1,000,000. Same problem,
+same paper bound, six orders of magnitude further in practice, because the
+algorithm stops enumerating and starts repairing.
+
+Two asymptotic results that *are* firm, and worth separating from the above:
+
+- Enumerating *every* solution is inherently super-exponential, since there are
+  that many to emit. Simkin showed Q(n) = ((1 +/- o(1)) n e^-a)^n with
+  a = 1.942 +/- 0.003, later refined to 1.94400(1).
+- Finding *one* solution is O(n), by construction rather than by search - see
+  below. The gap between that and anything here is the price of searching.
+
+- M. Simkin, "The number of n-queens configurations", 2021.
+  <https://arxiv.org/abs/2107.13460>
+- P. Nobel et al., "Computing tighter bounds on the n-queens constant via
+  Newton's method", *Optimization Letters*, 2022.
+  <https://link.springer.com/article/10.1007/s11590-022-01933-2>
+- Solution counts: OEIS A000170. <https://oeis.org/A000170>
+- S. Minton, M. D. Johnston, A. B. Philips and P. Laird, "Minimizing conflicts:
+  a heuristic repair method for constraint satisfaction and scheduling
+  problems", *Artificial Intelligence* 58, 1992, 161-205.
+  <https://www.dcs.gla.ac.uk/~pat/cpM/papers/mintonAIJ.pdf>
+
+### If a solution is all you want
+
+Neither solver here is the quick way to get a single n-queens board. Explicit
+constructions place all n queens directly, in O(n), with no search at all, for
+every n >= 4. Backtracking is worth running when you want *every* solution, and
+the genetic search when you want to watch a stochastic method work; if you
+simply need a valid board for some large n, use a construction.
+
+- E. J. Hoffman, J. C. Loessi and R. C. Moore, "Constructions for the Solution
+  of the m Queens Problem", *Mathematics Magazine* 42(2), 1969, 66-72.
+  <https://www.tandfonline.com/doi/abs/10.1080/0025570X.1969.11975924>
+- B. Bernhardsson, "Explicit solutions to the N-queens problem for all N",
+  *ACM SIGART Bulletin* 2(2), 1991, 7. <https://dl.acm.org/doi/10.1145/122319.122322>
+- B.-J. Falkowski and L. Schmitz, "A note on the queens' problem",
+  *Information Processing Letters* 23(1), 1986, 39-46.
+  <https://www.sciencedirect.com/science/article/abs/pii/0020019086901286>
+- C. P. Gomes, B. Selman and N. Crato, "Heavy-tailed distributions in
+  combinatorial search", *CP-97*, LNCS 1330.
+  <https://link.springer.com/chapter/10.1007/BFb0017434>
+- C. P. Gomes, B. Selman, N. Crato and H. Kautz, "Heavy-Tailed Phenomena in
+  Satisfiability and Constraint Satisfaction Problems", *Journal of Automated
+  Reasoning* 24, 2000. <https://link.springer.com/article/10.1023/A:1006314320276>
